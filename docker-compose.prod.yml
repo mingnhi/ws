@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  nestapp:
+    container_name: nestapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app            # Mount mã nguồn để auto reload khi code thay đổi
+      - /app/node_modules # Giữ node_modules trong container
+    restart: always
+    command: npm run start:dev  # Auto reload (nếu dùng Nest CLI)
