@@ -1,0 +1,99 @@
+<%- include('partials/header') %>
+
+<div class="products-section">
+    <h2><%= categoryName %></h2>
+    <div class="filter-section">
+        <form action="/category/<%= categorySlug %>" method="GET">
+            <div class="filter-group">
+                <label for="price">Lọc theo giá:</label>
+                <select name="price" id="price" onchange="this.form.submit()">
+                    <option value="">Tất cả</option>
+                    <option value="0-500000" <%= priceFilter === '0-500000' ? 'selected' : '' %>>0 - 500,000đ</option>
+                    <option value="500000-1000000" <%= priceFilter === '500000-1000000' ? 'selected' : '' %>>500,000đ - 1,000,000đ</option>
+                    <option value="1000000-" <%= priceFilter === '1000000-' ? 'selected' : '' %>>Trên 1,000,000đ</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Màu sắc:</label>
+                <div class="color-filter">
+                    <input type="checkbox" name="colors" value="red" id="color-red" <%= colorsFilter.includes('red') ? 'checked' : '' %> onchange="this.form.submit()">
+                    <label for="color-red" style="background-color: #ff0000;"></label>
+                    <input type="checkbox" name="colors" value="black" id="color-black" <%= colorsFilter.includes('black') ? 'checked' : '' %> onchange="this.form.submit()">
+                    <label for="color-black" style="background-color: #000000;"></label>
+                    <input type="checkbox" name="colors" value="white" id="color-white" <%= colorsFilter.includes('white') ? 'checked' : '' %> onchange="this.form.submit()">
+                    <label for="color-white" style="background-color: #ffffff; border: 1px solid #ccc;"></label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="product-list">
+        <% if (products && products.length > 0) { %>
+            <% products.forEach(product => { %>
+                <div class="product-card">
+                    <a href="/product/view/<%= product.id %>">
+                        <div class="product-image">
+                            <img src="<%= product.image || 'https://via.placeholder.com/150' %>" alt="<%= product.name %>">
+                        </div>
+                        <div class="product-info">
+                            <h3><%= product.name %></h3>
+                            <p class="price"><%= product.price.toLocaleString('vi-VN') %>đ</p>
+                            <div class="colors">
+                                <% if (product.colors) { %>
+                                    <% product.colors.forEach(color => { %>
+                                        <span style="background-color: <%= color %>;"></span>
+                                    <% }) %>
+                                <% } else { %>
+                                    <span style="background-color: #000000;"></span>
+                                    <span style="background-color: #808080;"></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>Chưa có sản phẩm nào trong danh mục này.</p>
+        <% } %>
+    </div>
+</div>
+
+<style>
+.filter-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 10px;
+}
+.filter-group {
+    margin-bottom: 15px;
+}
+.filter-group label {
+    font-size: 14px;
+    color: #333;
+    margin-right: 10px;
+}
+.filter-group select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.color-filter {
+    display: flex;
+    gap: 10px;
+}
+.color-filter input {
+    display: none;
+}
+.color-filter label {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-block;
+}
+.color-filter input:checked + label {
+    border: 2px solid #e74c3c;
+}
+</style>
+
+<%- include('partials/footer') %>

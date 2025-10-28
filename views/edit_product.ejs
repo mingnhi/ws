@@ -1,0 +1,242 @@
+<%- include('partials/header') %>
+
+<div class="edit-product-section">
+    <h2>CHỈNH SỬA SẢN PHẨM #<%= product.id %></h2>
+    <div class="edit-product-container">
+        <form action="/admin/product/<%= product.id %>" method="POST" id="edit-product-form">
+            <div class="info-field">
+                <label>Tên sản phẩm <span style="color: red;">*</span></label>
+                <input type="text" name="name" value="<%= product.name %>" required>
+            </div>
+            <div class="info-field">
+                <label>Giá <span style="color: red;">*</span></label>
+                <input type="number" name="price" min="0" value="<%= product.price %>" required>
+            </div>
+            <div class="info-field">
+                <label>Số lượng <span style="color: red;">*</span></label>
+                <input type="number" name="quantity" min="0" value="<%= product.quantity %>" required>
+            </div>
+            <div class="info-field">
+                <label>Mô tả</label>
+                <textarea name="description"><%= product.description || '' %></textarea>
+            </div>
+            <div class="info-field">
+                <label>Danh mục <span style="color: red;">*</span></label>
+                <select name="categoryId" required>
+                    <% categories.forEach(category => { %>
+                        <option value="<%= category.id %>" <%= product.category && product.category.id === category.id ? 'selected' : '' %>><%= category.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="info-field">
+                <label>Ảnh (URL) <span style="color: red;">*</span></label>
+                <input type="url" name="image" value="<%= product.image || '' %>" placeholder="Nhập URL ảnh (jpg, jpeg, png, webp)" required>
+                <div id="image-preview">
+                    <% if (product.image) { %>
+                        <img src="<%= product.image %>" style="width: 100px; height: 100px; object-fit: cover; margin: 5px;">
+                    <% } %>
+                </div>
+            </div>
+            <a href="/admin" class="cancel-button">Hủy</a>
+            <button type="submit" class="save-button">Lưu thay đổi</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+
+<script>
+function updateImagePreview() {
+    const preview = document.getElementById('image-preview');
+    preview.innerHTML = '';
+    const input = document.querySelector('input[name="image"]');
+    if (input.value) {
+        const img = document.createElement('img');
+        img.src = input.value;
+        img.style.width = '100px';
+        img.style.height = '100px';
+        img.style.objectFit = 'cover';
+        img.style.margin = '5px';
+        img.onerror = () => { img.src = 'https://via.placeholder.com/100?text=Invalid+URL'; };
+        preview.appendChild(img);
+    }
+}
+
+document.getElementById('edit-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+
+    // Validation
+    const name = form.name.value.trim();
+    const price = Number(form.price.value);
+    const quantity = Number(form.quantity.value);
+    const description = form.description.value.trim();
+    const categoryId = Number(form.categoryId.value);
+    const image = form.image.value.trim();
+
+    // Validate name
+    if (name.length < 3) {
+        Toastify({
+            text: 'Tên sản phẩm phải có ít nhất 3 ký tự.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate price
+    if (isNaN(price) || price < 1) {
+        Toastify({
+            text: 'Giá phải là số và lớn hơn hoặc bằng 1.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate quantity
+    if (isNaN(quantity) || quantity < 0) {
+        Toastify({
+            text: 'Số lượng phải là số và lớn hơn hoặc bằng 0.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate image
+    const validImageFormats = /\.(jpg|jpeg|png|webp)$/i;
+    if (!image || !validImageFormats.test(image)) {
+        Toastify({
+            text: 'URL ảnh không hợp lệ. Chỉ hỗ trợ jpg, jpeg, png, webp.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate categoryId
+    if (isNaN(categoryId)) {
+        Toastify({
+            text: 'Vui lòng chọn danh mục hợp lệ.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    const data = {
+        name,
+        price,
+        quantity,
+        description,
+        categoryId,
+        image
+    };
+
+    try {
+        const response = await fetch(`/admin/product/<%= product.id %>`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (response.ok) {
+            Toastify({
+                text: 'Cập nhật sản phẩm thành công!',
+                style: { background: '#28a745' },
+                duration: 3000,
+            }).showToast();
+            setTimeout(() => window.location.href = '/admin', 3000);
+        } else {
+            const errorText = await response.text();
+            Toastify({
+                text: errorText || 'Lỗi khi cập nhật sản phẩm.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+        }
+    } catch (err) {
+        Toastify({
+            text: 'Không thể kết nối đến máy chủ.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+    }
+});
+
+// Add event listener for image input to update preview
+document.querySelector('input[name="image"]')?.addEventListener('input', updateImagePreview);
+</script>
+
+<style>
+.edit-product-section {
+    padding: 50px 40px;
+    background-color: #fff;
+    min-height: calc(100vh - 200px);
+}
+.edit-product-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.info-field {
+    margin-bottom: 20px;
+}
+.info-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.info-field input, .info-field textarea, .info-field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.info-field textarea {
+    height: 100px;
+    resize: vertical;
+}
+#image-preview {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.cancel-button {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    text-transform: uppercase;
+    margin-right: 10px;
+}
+.cancel-button:hover {
+    background-color: #5a6268;
+}
+.save-button {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+.save-button:hover {
+    background-color: #218838;
+}
+</style>
+
+<%- include('partials/footer') %>

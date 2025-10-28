@@ -1,0 +1,59 @@
+<%- include('partials/header') %>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Login</h2>
+            <div id="success-message" style="display: none; color: green; text-align: center; margin-bottom: 15px;"></div>
+            <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 15px; background-color: #f8d7da; padding: 10px; border-radius: 5px;"></div>
+            <form action="/auth/login" method="POST">
+                <label for="email">Email đăng nhập <span style="color: red;">*</span></label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="password">Mật khẩu <span style="color: red;">*</span></label>
+                <input type="password" id="password" name="password" required>
+
+                <button type="submit">Đăng nhập</button>
+            </form>
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="#">Quên mật khẩu?</a>
+            </p>
+            <p style="text-align: center; margin-top: 15px;">
+                Bạn chưa có tài khoản? <a href="/auth/register">Đăng ký ngay</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Kiểm tra cookie message
+        const message = getCookie('message');
+        if (message) {
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'block';
+            successMessage.textContent = message;
+            document.cookie = 'message=; Max-Age=0; path=/';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Kiểm tra cookie error
+        const error = getCookie('error');
+        if (error) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = error;
+            document.cookie = 'error=; Max-Age=0; path=/';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+
+    <%- include('partials/footer') %>

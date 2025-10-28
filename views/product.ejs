@@ -1,0 +1,288 @@
+<%- include('partials/header') %>
+
+<div class="product-detail-section">
+  <div id="message" style="display: none; text-align: center; margin-bottom: 15px; padding: 10px; border-radius: 5px;"></div>
+  <div class="product-detail-container">
+    <!-- Cột trái: Hình ảnh sản phẩm -->
+    <div class="product-images">
+      <div class="main-image">
+        <img src="<%= product.image || 'https://via.placeholder.com/400' %>" alt="<%= product.name %>">
+      </div>
+      <div class="thumbnail-images">
+        <img src="<%= product.image || 'https://via.placeholder.com/100' %>" alt="Thumbnail 1">
+        <img src="<%= product.image || 'https://via.placeholder.com/100' %>" alt="Thumbnail 2">
+        <img src="<%= product.image || 'https://via.placeholder.com/100' %>" alt="Thumbnail 3">
+        <img src="<%= product.image || 'https://via.placeholder.com/100' %>" alt="Thumbnail 4">
+      </div>
+    </div>
+
+    <!-- Cột phải: Thông tin sản phẩm -->
+    <div class="product-info">
+      <h1><%= product.name %></h1>
+      <div class="rating">
+        <span>★★★★★</span>
+        <span>(1 đánh giá | 1 lượt thích)</span>
+      </div>
+      <p class="price"><%= product.price.toLocaleString('vi-VN') %>đ</p>
+      <form action="/cart" method="POST" class="add-to-cart-form">
+        <div class="colors">
+          <label>Màu:</label>
+          <div class="color-options">
+            <input type="radio" name="color" value="white" id="color-white" required>
+            <label for="color-white" style="background-color: #fff; border: 1px solid #ccc;"></label>
+            <input type="radio" name="color" value="cream" id="color-cream">
+            <label for="color-cream" style="background-color: #f5f5d5;"></label>
+          </div>
+        </div>
+        <div class="sizes">
+          <label>Kích thước:</label>
+          <div class="size-options">
+            <input type="radio" name="size" value="35" id="size-35" required>
+            <label for="size-35">35</label>
+            <input type="radio" name="size" value="36" id="size-36">
+            <label for="size-36">36</label>
+            <input type="radio" name="size" value="37" id="size-37">
+            <label for="size-37">37</label>
+            <input type="radio" name="size" value="38" id="size-38">
+            <label for="size-38">38</label>
+            <input type="radio" name="size" value="39" id="size-39">
+            <label for="size-39">39</label>
+          </div>
+        </div>
+        <div class="quantity">
+          <label for="quantity">Số lượng:</label>
+          <input type="number" name="quantity" id="quantity" value="1" min="1" max="<%= product.quantity %>" required>
+        </div>
+        <input type="hidden" name="productId" value="<%= product.id %>">
+        <div class="actions">
+          <button type="submit" class="add-to-cart">Thêm vào giỏ hàng</button>
+          <button type="button" class="buy-now" onclick="window.location.href='/checkout'">Mua ngay</button>
+        </div>
+      </form>
+      <div class="store-info">
+        <p><span>📍</span> TÌM SẢN PHẨM TẠI SHOWROOM</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông tin chi tiết sản phẩm -->
+  <div class="product-description">
+    <h2>CHI TIẾT SẢN PHẨM</h2>
+    <p><%= product.description || 'Mô tả sản phẩm không có sẵn.' %></p>
+  </div>
+</div>
+
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  // Kiểm tra cookie message hoặc error
+  const message = getCookie('message');
+  const error = getCookie('error');
+  const messageDiv = document.getElementById('message');
+  if (message) {
+    messageDiv.style.display = 'block';
+    messageDiv.style.backgroundColor = '#d4edda';
+    messageDiv.style.color = '#155724';
+    messageDiv.textContent = message;
+    document.cookie = 'message=; Max-Age=0; path=/';
+    setTimeout(() => {
+      messageDiv.style.display = 'none';
+    }, 5000);
+  }
+  if (error) {
+    messageDiv.style.display = 'block';
+    messageDiv.style.backgroundColor = '#f8d7da';
+    messageDiv.style.color = '#721c24';
+    messageDiv.textContent = error;
+    document.cookie = 'error=; Max-Age=0; path=/';
+    setTimeout(() => {
+      messageDiv.style.display = 'none';
+    }, 5000);
+  }
+
+  // Xử lý chọn màu sắc và kích thước
+  document.querySelectorAll('.color-options input').forEach(input => {
+    input.addEventListener('change', () => {
+      document.querySelectorAll('.color-options label').forEach(label => {
+        label.style.border = '1px solid #ccc';
+      });
+      const selectedLabel = document.querySelector(`label[for="${input.id}"]`);
+      selectedLabel.style.border = '2px solid #e74c3c';
+    });
+  });
+
+  document.querySelectorAll('.size-options input').forEach(input => {
+    input.addEventListener('change', () => {
+      document.querySelectorAll('.size-options label').forEach(label => {
+        label.style.backgroundColor = '#fff';
+        label.style.color = '#333';
+      });
+      const selectedLabel = document.querySelector(`label[for="${input.id}"]`);
+      selectedLabel.style.backgroundColor = '#e74c3c';
+      selectedLabel.style.color = '#fff';
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>
+
+<style>
+  .product-detail-section {
+    padding: 50px 40px;
+    background-color: #fff;
+  }
+  .product-detail-container {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+  }
+  .product-images {
+    flex: 1;
+    max-width: 500px;
+  }
+  .main-image img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  .thumbnail-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .thumbnail-images img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .product-info {
+    flex: 1;
+    max-width: 500px;
+  }
+  .product-info h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  .rating {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #f1c40f;
+    font-size: 14px;
+  }
+  .price {
+    font-size: 24px;
+    color: #e74c3c;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  .colors, .sizes, .quantity {
+    margin-bottom: 20px;
+  }
+  .colors label, .sizes label, .quantity label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .color-options {
+    display: flex;
+    gap: 10px;
+  }
+  .color-options input {
+    display: none;
+  }
+  .color-options label {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .sizes input {
+    display: none;
+  }
+  .size-options {
+    display: flex;
+    gap: 10px;
+  }
+  .size-options label {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+  }
+  .quantity input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+  }
+  .actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .buy-now, .add-to-cart {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    text-transform: uppercase;
+  }
+  .buy-now {
+    background-color: #e74c3c;
+    color: #fff;
+  }
+  .buy-now:hover {
+    background-color: #c0392b;
+  }
+  .add-to-cart {
+    background-color: #fff;
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+  }
+  .add-to-cart:hover {
+    background-color: #e74c3c;
+    color: #fff;
+  }
+  .store-info {
+    font-size: 14px;
+    color: #333;
+  }
+  .store-info span {
+    margin-right: 5px;
+  }
+  .product-description {
+    margin-top: 50px;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .product-description h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    color: #333;
+  }
+  .product-description p {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+  }
+</style>

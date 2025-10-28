@@ -1,0 +1,129 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Category {
+  id: Int!
+  name: String!
+  description: String!
+  create_at: DateTime!
+  products: [Product!]
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Order {
+  id: Int!
+  user: User!
+  orderDetails: [OrderDetail!]!
+  quantity: Int!
+  status: String!
+  user_name: String!
+  user_phone: String!
+  address_user: String!
+}
+
+type OrderDetail {
+  id: Int!
+  productName: String!
+  description: String
+  total_price: Int!
+  quantity: Int!
+  order: Order!
+  product: Product!
+}
+
+type Product {
+  id: Int!
+  name: String!
+  price: Int!
+  description: String!
+  image: String!
+  quantity: Int!
+  create_at: DateTime!
+  categoryId: Int!
+  carts: [Cart!]
+  category: Category!
+  orderdetail: [OrderDetail!]
+}
+
+type Cart {
+  id: Int!
+  quantity: Int!
+  image: String!
+  product_name: String!
+  price: Int!
+  user: User!
+  product: Product!
+}
+
+type User {
+  id: Int!
+  user_name: String!
+  email: String!
+  address: String!
+  phone: String!
+  role: String!
+  carts: [Cart!]
+  orders: [Order!]
+}
+
+type Query {
+  getProducts: [Product!]!
+  getProduct(id: Int!): Product!
+  getCategories: [Category!]!
+  getCategory(id: Int!): Category!
+  getAllCarts: [Cart!]!
+}
+
+type Mutation {
+  createProduct(createProductInput: CreateProductInput!): Product!
+  updateProduct(id: Int!, input: UpdateProductInput!): Product!
+  deleteProduct(id: Int!): Boolean!
+  createCategory(input: CreateCategoryDto!): Category!
+  updateCategory(id: Int!, input: UpdateCategoryDto!): Category!
+  deleteCategory(id: Int!): Boolean!
+  createCart(input: CreateCartDto!): Cart!
+  updateCart(input: CreateCartDto!): Cart!
+  removeCart(cartId: Int!): Boolean!
+}
+
+input CreateProductInput {
+  name: String!
+  price: Int!
+  quantity: Int!
+  description: String!
+  categoryId: Int!
+  image: String!
+}
+
+input UpdateProductInput {
+  name: String
+  price: Int
+  quantity: Int
+  description: String
+  categoryId: Int
+  image: String
+}
+
+input CreateCategoryDto {
+  name: String!
+  description: String!
+}
+
+input UpdateCategoryDto {
+  name: String
+  description: String
+}
+
+input CreateCartDto {
+  id: Int!
+  productId: Int!
+  quantity: Int!
+  product_name: String!
+  price: Int!
+  image: String!
+}

@@ -1,0 +1,152 @@
+<%- include('partials/header') %>
+
+    <div class="banner">
+        <div class="banner-slideshow">
+            <!-- Slide 1 -->
+            <div class="banner-slide">
+                <div class="banner-image" style="background-image: url('/images/chup-giay-the-thao-beyono6.jpg');"></div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="banner-slide">
+                <div class="banner-image" style="background-image: url('/images/chup-giay-the-thao-beyono7.jpg');"></div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="banner-slide">
+                <div class="banner-image" style="background-image: url('/images/lam-the-nao-chup-anh-giay-the-thao-beyono-khong-bi-bong.jpeg');"></div>
+            </div>
+        </div>
+        <!-- Dots for navigation -->
+        <div class="banner-dots">
+            <span class="dot" onclick="currentSlide(0)"></span>
+            <span class="dot" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+        </div>
+    </div>
+
+    <div class="products-section">
+        <h2>GIÀY NỮ</h2>
+        <div class="product-list">
+            <% if (sandalsWomen && sandalsWomen.length > 0) { %>
+                <% sandalsWomen.forEach(product => { %>
+                    <div class="product-card">
+                        <a href="/product/view/<%= product.id %>">
+                            <div class="product-image">
+                                <img src="<%= product.image || 'https://via.placeholder.com/150' %>" alt="<%= product.name %>">
+                            </div>
+                            <div class="product-info">
+                                <h3>
+                                    <%= product.name %>
+                                </h3>
+                                <p class="price">
+                                    <%= product.price.toLocaleString('vi-VN') %>đ</p>
+                                <div class="colors">
+                                    <% if (product.colors) { %>
+                                        <% product.colors.forEach(color => { %>
+                                            <span style="background-color: <%= color %>;"></span>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <span style="background-color: #000000;"></span>
+                                                    <span style="background-color: #808080;"></span>
+                                                    <% } %>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <p>Chưa có sản phẩm nào trong danh mục này.</p>
+                            <% } %>
+        </div>
+
+        <h2>GIÀY NAM</h2>
+        <div class="product-list">
+            <% if (sandalsMen && sandalsMen.length > 0) { %>
+                <% sandalsMen.forEach(product => { %>
+                    <div class="product-card">
+                        <a href="/product/view/<%= product.id %>">
+                            <div class="product-image">
+                                <img src="<%= product.image || 'https://via.placeholder.com/150' %>" alt="<%= product.name %>">
+                            </div>
+                            <div class="product-info">
+                                <h3>
+                                    <%= product.name %>
+                                </h3>
+                                <p class="price">
+                                    <%= product.price.toLocaleString('vi-VN') %>đ</p>
+                                <div class="colors">
+                                    <% if (product.colors) { %>
+                                        <% product.colors.forEach(color => { %>
+                                            <span style="background-color: <%= color %>;"></span>
+                                            <% }) %>
+                                                <% } else { %>
+                                                    <span style="background-color: #000000;"></span>
+                                                    <span style="background-color: #808080;"></span>
+                                                    <% } %>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <p>Chưa có sản phẩm nào trong danh mục này.</p>
+                            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        const message = getCookie('message');
+        if (message) {
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'block';
+            successMessage.textContent = message;
+            document.cookie = 'message=; Max-Age=0; path=/';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Slideshow logic
+        let slideIndex = 0;
+        showSlides();
+
+        function showSlides() {
+            let slides = document.getElementsByClassName("banner-slide");
+            let dots = document.getElementsByClassName("dot");
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+                slides[i].classList.remove("active");
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) {
+                slideIndex = 1
+            }
+            slides[slideIndex - 1].style.display = "block";
+            slides[slideIndex - 1].classList.add("active");
+            dots[slideIndex - 1].className += " active";
+            setTimeout(showSlides, 5000); // Change slide every 5 seconds
+        }
+
+        function currentSlide(n) {
+            slideIndex = n;
+            let slides = document.getElementsByClassName("banner-slide");
+            let dots = document.getElementsByClassName("dot");
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+                slides[i].classList.remove("active");
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex].style.display = "block";
+            slides[slideIndex].classList.add("active");
+            dots[slideIndex].className += " active";
+        }
+    </script>
+
+    <%- include('partials/footer') %>

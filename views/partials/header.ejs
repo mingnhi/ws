@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MWC -
+        <%- typeof title !== 'undefined' ? title : 'Trang chủ' %>
+    </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        /* Navbar */
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px 60px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .navbar .logo a {
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            gap: 50px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .navbar ul li {
+            position: relative;
+        }
+        
+        .navbar ul li a {
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        
+        .navbar ul li a:hover {
+            color: #e74c3c;
+        }
+        
+        .navbar ul li .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            min-width: 150px;
+            z-index: 1;
+        }
+        
+        .navbar ul li:hover .dropdown {
+            display: block;
+        }
+        
+        .navbar ul li .dropdown a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .navbar ul li .dropdown a:hover {
+            background-color: #f0f0f0;
+            color: #e74c3c;
+        }
+        
+        .navbar .search-cart {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        
+        .navbar .search-cart input {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 150px;
+        }
+        
+        .navbar .search-cart span {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .navbar .search-cart .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .navbar .search-cart .user-menu .user-icon {
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .navbar .search-cart .user-menu .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            min-width: 120px;
+            z-index: 1;
+        }
+        
+        .navbar .search-cart .user-menu:hover .dropdown {
+            display: block;
+        }
+        
+        .navbar .search-cart .user-menu .dropdown a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .navbar .search-cart .user-menu .dropdown a:hover {
+            background-color: #f0f0f0;
+        }
+        /* Banner Slideshow */
+        
+        .banner {
+            position: relative;
+            height: 600px;
+            /* Increased from 500px to 600px */
+            overflow: hidden;
+        }
+        
+        .banner-slideshow {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .banner-slide {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            /* Smooth fade effect */
+        }
+        
+        .banner-slide.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .banner-image {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            /* Ensures image scales properly */
+            background-position: center;
+        }
+        
+        .banner-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .dot.active {
+            background-color: #e74c3c;
+        }
+        /* Products Section */
+        
+        .products-section {
+            padding: 50px 40px;
+            background-color: #fff;
+        }
+        
+        .products-section h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            color: #333;
+        }
+        
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            justify-items: center;
+        }
+        
+        .product-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 280px;
+            text-align: center;
+            padding: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+        
+        .product-image {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+        
+        .product-info {
+            padding: 10px 0;
+        }
+        
+        .product-info h3 {
+            font-size: 14px;
+            margin: 10px 0;
+            color: #333;
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .product-info .price {
+            font-size: 16px;
+            color: #e74c3c;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        
+        .product-info .colors {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .product-info .colors span {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid #ccc;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: center;
+            padding: 50px 20px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .form-section {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: left;
+        }
+        
+        .form-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+            text-transform: uppercase;
+        }
+        
+        .form-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .form-section input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        
+        .form-section button {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        
+        .form-section button:hover {
+            background-color: #555;
+        }
+        
+        .form-section .social-login {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .form-section .social-login button {
+            flex: 1;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .form-section .social-login button:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .form-section .contact-info {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .form-section a {
+            color: #e74c3c;
+            text-decoration: none;
+        }
+        
+        .form-section a:hover {
+            text-decoration: underline;
+        }
+        /* Cart */
+        
+        .cart-section {
+            padding: 50px 40px;
+            background-color: #fff;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .cart-section h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            color: #333;
+        }
+        
+        .cart-table {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+        
+        .cart-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .cart-table th,
+        .cart-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-table th {
+            background-color: #f5f5f5;
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #333;
+        }
+        
+        .cart-item-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .quantity-form {
+            display: inline-block;
+        }
+        
+        .quantity-form input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .remove-button {
+            padding: 8px 15px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .remove-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .cart-summary {
+            max-width: 1200px;
+            margin: 20px auto;
+            text-align: right;
+        }
+        
+        .cart-summary h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .cart-summary h3 span {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .cart-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+        
+        .continue-shopping,
+        .checkout-button {
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .continue-shopping {
+            background-color: #fff;
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .continue-shopping:hover {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        
+        .checkout-button {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        
+        .checkout-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        /* Product_detail */
+        
+        .product-detail-section {
+            padding: 50px 40px;
+            background-color: #fff;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .product-detail-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .product-image img {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .product-info h2 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .price {
+            font-size: 20px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .description {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .add-to-cart-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .add-to-cart-form label {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .add-to-cart-form input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .add-to-cart-button {
+            padding: 12px 25px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .add-to-cart-button:hover {
+            background-color: #c0392b;
+        }
+        
+        .out-of-stock {
+            font-size: 16px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .back-to-shop {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            border: 1px solid #e74c3c;
+            border-radius: 5px;
+            color: #e74c3c;
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        
+        .back-to-shop:hover {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+        
+        .footer {
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ccc;
+            margin-top: 50px;
+        }
+        
+        .footer .contact {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .footer .contact div {
+            flex: 1;
+        }
+        
+        .footer .contact div h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .footer .contact div p,
+        .footer .contact div ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .footer .contact div ul li {
+            margin-bottom: 5px;
+        }
+        
+        .footer .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .footer .social-icons img {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            z-index: 10;
+            padding: 10px;
+            display: none;
+            /* Ẩn mặc định, sẽ hiển thị khi có kết quả */
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .product-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+        
+        .product-item:last-child {
+            border-bottom: none;
+        }
+        
+        .product-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .product-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        
+        .product-item-info {
+            flex: 1;
+        }
+        
+        .product-item-info h3 {
+            font-size: 14px;
+            margin: 0;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .product-item-info p {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .product-item-info .price {
+            font-size: 14px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .search-results .no-results {
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="logo"><a href="/home">LNN</a></div>
+        <ul>
+            <li><a href="/home">GIỚI THIỆU</a></li>
+            <li>
+                <a href="#">GIÀY NỮ</a>
+                <div class="dropdown">
+                    <a href="/category/giay-the-thao">GIÀY THỂ THAO</a>
+                    <a href="/category/sandal-nu">SANDAL NỮ</a>
+                </div>
+            </li>
+            <li>
+                <a href="#">GIÀY NAM</a>
+                <div class="dropdown">
+                    <a href="/category/giay-the-thao-nam">GIÀY THỂ THAO NAM</a>
+                    <a href="/category/sandal-nam">SANDAL NAM</a>
+                </div>
+            </li>
+        </ul>
+        <div class="search-cart">
+            <div class="search-box">
+                <form action="/search" method="GET">
+                    <input type="text" name="q" id="search-input" placeholder="Tìm kiếm">
+                    <button type="submit" id="search-button" class="search-icon">🔍</button>
+                </form>
+            </div>
+            <div id="search-results"></div>
+            <div class="cart-user">
+                <a href="/cart"><span>🛒</span></a>
+                <div class="user-menu">
+                    <span class="user-icon">👤</span>
+                    <div class="dropdown">
+                        <% if (typeof user !== 'undefined' && user) { %>
+                            <% if (user.role === 'admin') { %>
+                                <a href="/admin">Quản trị</a>
+                                <% } %>
+                                    <a href="/auth/profile">Hồ sơ cá nhân</a>
+                                    <a href="/auth/logout">Logout</a>
+                                    <% } else { %>
+                                        <a href="/auth/login">Login</a>
+                                        <a href="/auth/register">Signup</a>
+                                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById("search-form").addEventListener("submit", async(e) => {
+            e.preventDefault(); // Ngừng form từ việc reload trang
+            const query = document.getElementById("search-input").value.trim();
+            const resultsDiv = document.getElementById("search-results");
+
+            if (query) {
+                try {
+                    // Gửi yêu cầu tìm kiếm đến server
+                    const response = await fetch(`/product/search?q=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+
+                    resultsDiv.innerHTML = ""; // Xóa kết quả cũ
+                    resultsDiv.classList.remove("active"); // Ẩn trước khi hiển thị kết quả mới
+
+                    // Kiểm tra nếu có sản phẩm
+                    if (data.data && data.data.length > 0) {
+                        data.data.forEach((product) => {
+                            const productElement = document.createElement("div");
+                            productElement.classList.add("product-item");
+
+                            // Thêm hình ảnh nếu có, nếu không thì để trống
+                            const imageUrl = product.image || "https://via.placeholder.com/60"; // Hình ảnh mặc định nếu không có
+
+                            productElement.innerHTML = `
+                            <img src="${imageUrl}" alt="${product.name}">
+                            <div class="product-item-info">
+                                <h3>${product.name}</h3>
+                                <p>${product.description}</p>
+                                <p class="price">${product.price.toLocaleString()}đ</p>
+                            </div>
+                        `;
+                            resultsDiv.appendChild(productElement);
+                        });
+                        resultsDiv.classList.add("active"); // Hiển thị kết quả
+                    } else {
+                        resultsDiv.innerHTML = `<p class="no-results">No products found.</p>`;
+                        resultsDiv.classList.add("active");
+                    }
+                } catch (error) {
+                    console.error("Error during search:", error);
+                    resultsDiv.innerHTML = `<p class="no-results">Error occurred while searching.</p>`;
+                    resultsDiv.classList.add("active");
+                }
+            } else {
+                resultsDiv.innerHTML = `<p class="no-results">Please enter a search term.</p>`;
+                resultsDiv.classList.add("active");
+            }
+        });
+
+        // Ẩn kết quả tìm kiếm khi nhấp ra ngoài
+        document.addEventListener("click", (e) => {
+            const searchResults = document.getElementById("search-results");
+            const searchBox = document.querySelector(".search-box");
+
+            if (!searchBox.contains(e.target)) {
+                searchResults.classList.remove("active");
+            }
+        });
+    </script>
+</body>

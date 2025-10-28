@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order List</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <h1>Danh sách đơn hàng</h1>
+
+  <a href="/order/create" class="btn">Tạo đơn hàng mới</a>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tên người đặt</th>
+        <th>SĐT</th>
+        <th>Địa chỉ</th>
+        <th>Số lượng</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(order => { %>
+        <tr>
+          <td><%= order.id %></td>
+          <td><%= order.user_name %></td>
+          <td><%= order.user_phone %></td>
+          <td><%= order.address_user %></td>
+          <td><%= order.quantity %></td>
+          <td><%= order.status %></td>
+          <td>
+            <a href="/order/<%= order.id %>" class="btn">Chi tiết</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

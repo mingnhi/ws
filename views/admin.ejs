@@ -1,0 +1,586 @@
+<%- include('partials/header') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+
+<div class="admin-section">
+    <h2>QUẢN TRỊ</h2>
+    <div class="admin-container">
+        <div class="sidebar">
+            <ul>
+                <li class="active">
+                    <span class="icon">📦</span>
+                    <a href="#products" onclick="showSection('products')">Quản lý sản phẩm</a>
+                </li>
+                <li>
+                    <span class="icon">📋</span>
+                    <a href="#orders" onclick="showSection('orders')">Quản lý đơn hàng</a>
+                </li>
+                <li>
+                    <span class="icon">👥</span>
+                    <a href="#users" onclick="showSection('users')">Quản lý người dùng</a>
+                </li>
+            </ul>
+        </div>
+        <div class="content">
+            <!-- Quản lý sản phẩm -->
+            <div id="products" class="content-section active">
+                <h3>QUẢN LÝ SẢN PHẨM</h3>
+                <button class="add-button" onclick="showAddProductForm()">Thêm sản phẩm</button>
+                <div id="add-product-form" style="display: none;">
+                    <h4>Thêm sản phẩm mới</h4>
+                    <form action="/admin/product" method="POST" id="product-form">
+                        <div class="info-field">
+                            <label>Tên sản phẩm <span style="color: red;">*</span></label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="info-field">
+                            <label>Giá <span style="color: red;">*</span></label>
+                            <input type="number" name="price" min="1" required>
+                        </div>
+                        <div class="info-field">
+                            <label>Số lượng <span style="color: red;">*</span></label>
+                            <input type="number" name="quantity" min="0" required>
+                        </div>
+                        <div class="info-field">
+                            <label>Mô tả</label>
+                            <textarea name="description"></textarea>
+                        </div>
+                        <div class="info-field">
+                            <label>Danh mục <span style="color: red;">*</span></label>
+                            <select name="categoryId" required>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.id %>"><%= category.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="info-field">
+                            <label>Ảnh (URL) <span style="color: red;">*</span></label>
+                            <input type="url" name="image" placeholder="Nhập URL ảnh (jpg, jpeg, png, webp)" required>
+                            <div id="image-preview"></div>
+                        </div>
+                        <button type="button" class="cancel-button" onclick="document.getElementById('add-product-form').style.display = 'none';">Hủy</button>
+                        <button type="submit" class="save-button">Lưu sản phẩm</button>
+                    </form>
+                </div>
+                <div class="product-list">
+                    <% if (products && products.length > 0) { %>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tên</th>
+                                    <th>Giá</th>
+                                    <th>Số lượng</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% products.forEach(product => { %>
+                                    <tr>
+                                        <td><%= product.id %></td>
+                                        <td><%= product.name %></td>
+                                        <td><%= product.price.toLocaleString('vi-VN') %>đ</td>
+                                        <td><%= product.quantity %></td>
+                                        <td>
+                                            <button class="edit-button" onclick="editProduct(<%= product.id %>)">Sửa</button>
+                                            <button class="remove-button" onclick="deleteProduct(<%= product.id %>)">Xóa</button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    <% } else { %>
+                        <p>Chưa có sản phẩm nào.</p>
+                    <% } %>
+                </div>
+            </div>
+            <!-- Quản lý đơn hàng -->
+            <div id="orders" class="content-section">
+                <h3>QUẢN LÝ ĐƠN HÀNG</h3>
+                <% if (orders && orders.length > 0) { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tổng giá</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <tr id="order-<%= order.id %>">
+                                    <td>#<%= order.id %></td>
+                                    <td><%= order.total_price.toLocaleString('vi-VN') %>đ</td>
+                                    <td>
+                                        <select id="status-<%= order.id %>" onchange="updateOrderStatus(<%= order.id %>)" data-original-status="<%= order.status %>">
+                                            <option value="PENDING" <%= order.status === 'PENDING' ? 'selected' : '' %>>Chờ xử lý</option>
+                                            <option value="PREPARED" <%= order.status === 'PREPARED' ? 'selected' : '' %>>Đã chuẩn bị</option>
+                                            <option value="SHIPPED" <%= order.status === 'SHIPPED' ? 'selected' : '' %>>Đã giao hàng</option>
+                                            <option value="DELIVERED" <%= order.status === 'DELIVERED' ? 'selected' : '' %>>Hoàn thành</option>
+                                            <option value="CANCELLED" <%= order.status === 'CANCELLED' ? 'selected' : '' %>>Đã hủy</option>
+                                        </select>
+                                    </td>
+                                    <td><%= new Date(order.create_at).toLocaleDateString('vi-VN') %></td>
+                                    <td>
+                                        <a href="/order/<%= order.id %>" class="view-button">Xem</a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p>Chưa có đơn hàng nào.</p>
+                <% } %>
+            </div>
+            <!-- Quản lý người dùng -->
+            <div id="users" class="content-section">
+                <h3>QUẢN LÝ NGƯỜI DÙNG</h3>
+                <% if (users && users.length > 0) { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                                <tr>
+                                    <td><%= user.id %></td>
+                                    <td><%= user.user_name %></td>
+                                    <td><%= user.email %></td>
+                                    <td><%= user.role %></td>
+                                    <td>
+                                        <button class="edit-button" onclick="editUser(<%= user.id %>)">Sửa</button>
+                                        <button class="remove-button" onclick="deleteUser(<%= user.id %>)">Xóa</button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p>Chưa có người dùng nào.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function updateOrderStatus(orderId) {
+    const select = document.getElementById(`status-${orderId}`);
+    const newStatus = select.value;
+    const originalStatus = select.dataset.originalStatus;
+    select.disabled = true;
+
+    try {
+        const response = await fetch(`/order/${orderId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (response.ok) {
+            Toastify({
+                text: 'Cập nhật trạng thái thành công!',
+                style: { background: '#28a745' },
+                duration: 3000,
+            }).showToast();
+            setTimeout(() => window.location.reload(), 3000);
+        } else {
+            const errorText = await response.text();
+            Toastify({
+                text: errorText || 'Lỗi khi cập nhật trạng thái.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+            select.value = originalStatus;
+        }
+    } catch (err) {
+        Toastify({
+            text: 'Không thể kết nối đến máy chủ.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        select.value = originalStatus;
+    } finally {
+        select.disabled = false;
+    }
+}
+
+function showSection(sectionId) {
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.querySelectorAll('.sidebar li').forEach(li => {
+        li.classList.remove('active');
+    });
+    document.getElementById(sectionId).classList.add('active');
+    document.querySelector(`.sidebar a[href="#${sectionId}"]`).parentElement.classList.add('active');
+}
+
+function showAddProductForm() {
+    document.getElementById('add-product-form').style.display = 'block';
+}
+
+function updateImagePreview() {
+    const preview = document.getElementById('image-preview');
+    preview.innerHTML = '';
+    const input = document.querySelector('input[name="image"]');
+    if (input.value) {
+        const img = document.createElement('img');
+        img.src = input.value;
+        img.style.width = '100px';
+        img.style.height = '100px';
+        img.style.objectFit = 'cover';
+        img.style.margin = '5px';
+        img.onerror = () => { img.src = 'https://via.placeholder.com/100?text=Invalid+URL'; };
+        preview.appendChild(img);
+    }
+}
+
+async function editProduct(productId) {
+    try {
+        const response = await fetch(`/admin/product/${productId}/edit`);
+        if (response.status === 401) {
+            Toastify({
+                text: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+            setTimeout(() => window.location.href = '/auth/login', 3000);
+            return;
+        } else if (response.ok) {
+            window.location.href = `/admin/product/${productId}/edit`;
+        } else {
+            const errorText = await response.text();
+            Toastify({
+                text: errorText || 'Không thể tải trang chỉnh sửa sản phẩm.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+        }
+    } catch (err) {
+        Toastify({
+            text: err.message || 'Không thể kết nối đến máy chủ.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+    }
+}
+
+async function deleteProduct(productId) {
+    if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+        try {
+            const response = await fetch(`/admin/product/${productId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (response.ok) {
+                Toastify({
+                    text: 'Xóa sản phẩm thành công!',
+                    style: { background: '#28a745' },
+                    duration: 3000,
+                }).showToast();
+                setTimeout(() => window.location.reload(), 3000);
+            } else {
+                const errorText = await response.text();
+                Toastify({
+                    text: errorText || 'Lỗi khi xóa sản phẩm.',
+                    style: { background: '#dc3545' },
+                    duration: 3000,
+                }).showToast();
+            }
+        } catch (err) {
+            Toastify({
+                text: 'Không thể kết nối đến máy chủ.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+        }
+    }
+}
+
+async function editUser(userId) {
+    alert(`Chỉnh sửa người dùng ${userId} - Chức năng này cần được triển khai thêm!`);
+}
+
+async function deleteUser(userId) {
+    if (confirm('Bạn có chắc muốn xóa người dùng này?')) {
+        try {
+            const response = await fetch(`/admin/user/${userId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (response.ok) {
+                Toastify({
+                    text: 'Xóa người dùng thành công!',
+                    style: { background: '#28a745' },
+                    duration: 3000,
+                }).showToast();
+                setTimeout(() => window.location.reload(), 3000);
+            } else {
+                const errorText = await response.text();
+                Toastify({
+                    text: errorText || 'Lỗi khi xóa người dùng.',
+                    style: { background: '#dc3545' },
+                    duration: 3000,
+                }).showToast();
+            }
+        } catch (err) {
+            Toastify({
+                text: 'Không thể kết nối đến máy chủ.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+        }
+    }
+}
+
+document.getElementById('product-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+
+    // Validation
+    const name = form.name.value.trim();
+    const price = Number(form.price.value);
+    const quantity = Number(form.quantity.value);
+    const description = form.description.value.trim();
+    const categoryId = Number(form.categoryId.value);
+    const image = form.image.value.trim();
+
+    // Validate name
+    if (name.length < 3) {
+        Toastify({
+            text: 'Tên sản phẩm phải có ít nhất 3 ký tự.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate price
+    if (isNaN(price) || price < 1) {
+        Toastify({
+            text: 'Giá phải là số và lớn hơn hoặc bằng 1.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate quantity
+    if (isNaN(quantity) || quantity < 0) {
+        Toastify({
+            text: 'Số lượng phải là số và lớn hơn hoặc bằng 0.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate image
+    const validImageFormats = /\.(jpg|jpeg|png|webp)$/i;
+    if (!image || !validImageFormats.test(image)) {
+        Toastify({
+            text: 'URL ảnh không hợp lệ. Chỉ hỗ trợ jpg, jpeg, png, webp.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    // Validate categoryId
+    if (isNaN(categoryId)) {
+        Toastify({
+            text: 'Vui lòng chọn danh mục hợp lệ.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+        return;
+    }
+
+    const data = {
+        name,
+        price,
+        quantity,
+        description,
+        categoryId,
+        image
+    };
+
+    try {
+        const response = await fetch('/admin/product', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        if (response.status === 401) {
+            Toastify({
+                text: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+            setTimeout(() => window.location.href = '/auth/login', 3000);
+            return;
+        }
+        if (response.ok) {
+            Toastify({
+                text: 'Thêm sản phẩm thành công!',
+                style: { background: '#28a745' },
+                duration: 3000,
+            }).showToast();
+            setTimeout(() => window.location.reload(), 3000);
+        } else {
+            const errorText = await response.text();
+            Toastify({
+                text: errorText || 'Lỗi khi thêm sản phẩm.',
+                style: { background: '#dc3545' },
+                duration: 3000,
+            }).showToast();
+        }
+    } catch (err) {
+        Toastify({
+            text: 'Không thể kết nối đến máy chủ.',
+            style: { background: '#dc3545' },
+            duration: 3000,
+        }).showToast();
+    }
+});
+
+// Add event listener for image input to update preview
+document.querySelector('input[name="image"]')?.addEventListener('input', updateImagePreview);
+</script>
+
+<style>
+.admin-section {
+    padding: 50px 40px;
+    background-color: #fff;
+    min-height: calc(100vh - 200px);
+}
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+.sidebar {
+    flex: 0 0 250px;
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 10px;
+}
+.content {
+    flex: 1;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.content-section {
+    display: none;
+}
+.content-section.active {
+    display: block;
+}
+.add-button, .edit-button, .view-button {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+.add-button:hover, .edit-button:hover, .view-button:hover {
+    background-color: #218838;
+}
+.remove-button {
+    padding: 8px 15px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+.remove-button:hover {
+    background-color: #c82333;
+}
+.cancel-button {
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-right: 10px;
+}
+.cancel-button:hover {
+    background-color: #5a6268;
+}
+.save-button {
+    padding: 8px 15px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+.save-button:hover {
+    background-color: #218838;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+th {
+    background-color: #f5f5f5;
+}
+.info-field {
+    margin-bottom: 20px;
+}
+.info-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.info-field input, .info-field textarea, .info-field select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+.info-field textarea {
+    height: 100px;
+    resize: vertical;
+}
+#image-preview {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+</style>
+
+<%- include('partials/footer') %>

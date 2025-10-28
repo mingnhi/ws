@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<div class="cart-section">
+  <h2>GIỎ HÀNG CỦA BẠN</h2>
+  <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 15px; background-color: #f8d7da; padding: 10px; border-radius: 5px;"></div>
+  <div id="success-message" style="display: none; color: green; text-align: center; margin-bottom: 15px; background-color: #d4edda; padding: 10px; border-radius: 5px;"></div>
+  <% if (cart && cart.length > 0) { %>
+    <div class="cart-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Sản phẩm</th>
+            <th>Tên sản phẩm</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th>Tổng</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cart.forEach(item => { %>
+            <tr>
+              <td>
+                <img src="<%= item.image || 'https://via.placeholder.com/100' %>" alt="<%= item.product_name %>" class="cart-item-image">
+              </td>
+              <td><%= item.product_name %></td>
+              <td><%= item.price.toLocaleString('vi-VN') %>đ</td>
+              <td>
+                <form action="/cart/<%= item.id %>" method="POST" class="quantity-form">
+                  <input type="hidden" name="_method" value="PUT">
+                  <input type="number" name="quantity" value="<%= item.quantity %>" min="1" onchange="this.form.submit()">
+                </form>
+              </td>
+              <td><%= (item.price * item.quantity).toLocaleString('vi-VN') %>đ</td>
+              <td>
+                <form action="/cart/<%= item.id %>" method="POST">
+                  <input type="hidden" name="_method" value="DELETE">
+                  <button type="submit" class="remove-button">Xóa</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <div class="cart-summary">
+      <h3>Tổng cộng: <span><%= cart.reduce((total, item) => total + item.price * item.quantity, 0).toLocaleString('vi-VN') %>đ</span></h3>
+      <div class="cart-actions">
+        <a href="/product/list" class="continue-shopping">Tiếp tục mua sắm</a>
+        <button class="checkout-button" onclick="createOrder()">Xác nhận đặt hàng</button>
+      </div>
+    </div>
+  <% } else { %>
+    <p class="empty-cart">Giỏ hàng của bạn đang trống.</p>
+    <a href="/product/list" class="continue-shopping">Mua sắm ngay</a>
+  <% } %>
+</div>
+
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  // Kiểm tra cookie error hoặc message
+  const error = getCookie('error');
+  const message = getCookie('message');
+  if (error) {
+    const errorMessage = document.getElementById('error-message');
+    errorMessage.style.display = 'block';
+    errorMessage.textContent = error;
+    document.cookie = 'error=; Max-Age=0; path=/';
+    setTimeout(() => {
+      errorMessage.style.display = 'none';
+    }, 5000);
+  }
+  if (message) {
+    const successMessage = document.getElementById('success-message');
+    successMessage.style.display = 'block';
+    successMessage.textContent = message;
+    document.cookie = 'message=; Max-Age=0; path=/';
+    setTimeout(() => {
+      successMessage.style.display = 'none';
+    }, 5000);
+  }
+
+  // Hàm tạo đơn hàng
+  async function createOrder() {
+    const cartItems = <%- JSON.stringify(cart.map(item => ({ productId: item.product.id, quantity: item.quantity }))) %>;
+    if (!cartItems || cartItems.length === 0) {
+      document.cookie = 'error=Giỏ hàng trống.; Max-Age=5; path=/';
+      window.location.reload();
+      return;
+    }
+
+    try {
+      const response = await fetch('/order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ details: cartItems }),
+      });
+      if (response.ok) {
+        document.cookie = 'message=Đặt hàng thành công!; Max-Age=5; path=/';
+        window.location.href = '/order';
+      } else {
+        const errorText = await response.text();
+        document.cookie = `error=${errorText || 'Không thể tạo đơn hàng.'}; Max-Age=5; path=/`;
+        window.location.reload();
+      }
+    } catch (err) {
+      document.cookie = 'error=Không thể kết nối đến máy chủ.; Max-Age=5; path=/';
+      window.location.reload();
+    }
+  }
+</script>
+
+<%- include('partials/footer') %>
