@@ -51,47 +51,48 @@ pipeline {
         }
 
                 stage('Deploy to Server') {
-            steps {
-                echo "Triển khai ứng dụng lên server..."
-                withCredentials([
-                    usernamePassword(credentialsId: 'dockerhub-cred',
-                        usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS'),
-                    string(credentialsId: 'db-conn', variable: 'DB_CONN'),
-                    file(credentialsId: 'docker-compose-file', variable: 'DOCKER_COMPOSE_PATH')
-                ]) {
-                    sshagent (credentials: ['server-ssh-key']) {
-                        sh '''
-                        echo "Copy docker-compose.yml sang server..."
-                        scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:/root/project/docker-compose.prod.yml
+    steps {
+        echo "Triển khai ứng dụng lên server..."
+        withCredentials([
+            usernamePassword(credentialsId: 'dockerhub-cred',
+                usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS'),
+            string(credentialsId: 'db-conn', variable: 'DB_CONN'),
+            file(credentialsId: 'docker-compose-file', variable: 'DOCKER_COMPOSE_PATH')
+        ]) {
+            sshagent (credentials: ['server-ssh-key']) {
+                sh '''
+                echo "Copy docker-compose.yml sang server..."
+                scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:/root/project/docker-compose.prod.yml
 
-                        echo "Deploy qua SSH..."
-                        ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
-                            set -e
-                            cd /root/project
+                echo "Deploy qua SSH..."
+                ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << EOF
+                    set -e
+                    cd /root/project
 
-                            echo "Tạo file .env..."
-                            echo "DB_CONNECTION_STRING=$DB_CONN" > .env
+                    echo "Tạo file .env..."
+                    echo "DB_CONNECTION_STRING=$DB_CONN" > .env
 
-                            echo "Login Docker Hub..."
-                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    echo "Login Docker Hub..."
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                            echo "Pull image..."
-                            docker compose -f docker-compose.prod.yml --env-file .env pull
+                    echo "Pull image..."
+                    docker compose -f docker-compose.prod.yml --env-file .env pull
 
-                            echo "Restart container..."
-                            docker compose -f docker-compose.prod.yml --env-file .env down
-                            docker compose -f docker-compose.prod.yml --env-file .env up -d --no-build
+                    echo "Restart container..."
+                    docker compose -f docker-compose.prod.yml --env-file .env down
+                    docker compose -f docker-compose.prod.yml --env-file .env up -d --no-build
 
-                            echo "Dọn dẹp image cũ..."
-                            docker image prune -f
+                    echo "Dọn dẹp image cũ..."
+                    docker image prune -f
 
-                            docker logout
-                        EOF
-                        '''
-                    }
-                }
+                    docker logout
+                EOF
+                '''
             }
         }
+    }
+}
+
     }
 
     post {
