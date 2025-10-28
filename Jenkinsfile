@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REGISTRY = "docker.io/${DOCKER_USERNAME}"    // Docker registry
-        IMAGE_NAME = "server-lms-net"                // Tên image
+        IMAGE_NAME = "nestapp"                // Tên image
         SERVER_HOST = "188.166.208.144"                // IP production server
         SERVER_USER = "root"                         // User SSH vào server
         BRANCH = "main"
