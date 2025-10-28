@@ -8,7 +8,6 @@ pipeline {
         SERVER_USER = "root"                         // User SSH vào server
         BRANCH = "master"
     }
-
     stages {
 
         stage('Checkout') {
