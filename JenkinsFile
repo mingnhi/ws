@@ -16,7 +16,7 @@ pipeline {
                 checkout([$class: 'GitSCM',
                     branches: [[name: "*/${BRANCH}"]],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/XT-xuantruong/learnking.server.git',
+                        url: 'https://github.com/mingnhi/ws.git',
                         credentialsId: 'github-pat'
                     ]]
                 ])
