@@ -6,7 +6,7 @@ pipeline {
         IMAGE_NAME = "server-lms-net"                // Tên image
         SERVER_HOST = "188.166.208.144"                // IP production server
         SERVER_USER = "root"                         // User SSH vào server
-        BRANCH = "master"
+        BRANCH = "main"
     }
     stages {
 
