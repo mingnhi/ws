@@ -62,7 +62,7 @@ pipeline {
                     sshagent (credentials: ['server-ssh-key']) {
                         sh '''
                         echo "Copy docker-compose.yml sang server..."
-                        scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:/root/project/docker-compose.yml
+                        scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:/root/project/docker-compose.prod.yml
 
                         echo "Deploy qua SSH..."
                         ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
