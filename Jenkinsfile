@@ -63,7 +63,6 @@ pipeline {
                 sh '''
                 echo "Copy docker-compose.yml sang server..."
                 scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:/root/project/docker-compose.prod.yml
-
                 echo "Deploy qua SSH..."
                 ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << EOF
                     set -e
