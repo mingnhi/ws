@@ -72,9 +72,9 @@ pipeline {
                           echo 'DB_CONNECTION_STRING=$DB_CONN' > .env
                           
                           echo '$DOCKER_PASS' | docker login -u $DOCKER_USER --password-stdin
-                          docker compose --env-file .env pull
-                          docker compose --env-file .env down
-                          docker compose --env-file .env up -d
+                          docker compose -f docker-compose.prod.yml --env-file .env pull
+                          docker compose -f docker-compose.prod.yml --env-file .env down
+                          docker compose -f docker-compose.prod.yml --env-file .env up -d
                           docker image prune -f
                           docker logout
                         "
