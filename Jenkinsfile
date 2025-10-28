@@ -50,7 +50,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Server') {
+                stage('Deploy to Server') {
             steps {
                 echo "Triển khai ứng dụng lên server..."
                 withCredentials([
@@ -65,19 +65,28 @@ pipeline {
                         scp -o StrictHostKeyChecking=no $DOCKER_COMPOSE_PATH $SERVER_USER@$SERVER_HOST:/root/project/docker-compose.prod.yml
 
                         echo "Deploy qua SSH..."
-                        ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
-                          set -e
-                          cd /root/project
-                          
-                          echo 'DB_CONNECTION_STRING=$DB_CONN' > .env
-                          
-                          echo '$DOCKER_PASS' | docker login -u $DOCKER_USER --password-stdin
-                          docker compose -f docker-compose.prod.yml --env-file .env pull
-                          docker compose -f docker-compose.prod.yml --env-file .env down
-                          docker compose -f docker-compose.prod.yml --env-file .env up -d
-                          docker image prune -f
-                          docker logout
-                        "
+                        ssh -T -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST << 'EOF'
+                            set -e
+                            cd /root/project
+
+                            echo "Tạo file .env..."
+                            echo "DB_CONNECTION_STRING=$DB_CONN" > .env
+
+                            echo "Login Docker Hub..."
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                            echo "Pull image..."
+                            docker compose -f docker-compose.prod.yml --env-file .env pull
+
+                            echo "Restart container..."
+                            docker compose -f docker-compose.prod.yml --env-file .env down
+                            docker compose -f docker-compose.prod.yml --env-file .env up -d --no-build
+
+                            echo "Dọn dẹp image cũ..."
+                            docker image prune -f
+
+                            docker logout
+                        EOF
                         '''
                     }
                 }
