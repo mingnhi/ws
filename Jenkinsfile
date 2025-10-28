@@ -7,6 +7,7 @@ pipeline {
         SERVER_HOST = "188.166.208.144"                // IP production server
         SERVER_USER = "root"                         // User SSH vào server
         BRANCH = "main"
+        DB_CONN= "mysql://mingnhee:12070123Aa@@localhost:3306/nestproject"
     }
     stages {
 
